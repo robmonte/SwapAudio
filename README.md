@@ -11,7 +11,7 @@ Begin by double-clicking the Run.cmd file to configure SwapAudio. This helper cm
 Once the setup is complete, it is recommended to use a keyboard shortcut tool to map a key or key combination to trigger the SwapAudioDevices.exe file. A good choice would be your keyboard driver software, such as Corsair iCue. If you do not have a keyboard that supports this, or you'd rather not use such driver software, an AutoHotkey script is included that can have its keybind customized. It defaults to using the "Pause/Break" key on your keyboard as the swap key.
 
 To have this AutoHotkey script automatically run at Windows startup, you will need to move the SwapAudioDevices.ahk file into the path located at: `%appdata%\Microsoft\Windows\Start Menu\Programs\Startup` \
-Paste this path into your Windows explorer address bar to go straight to the folder, then move the script to it.
+Paste this path into your Windows explorer address bar to go straight to the folder, then move the script to it. For this AutoHotkey script to work out-of-the-box, then download the Release executable and place it inside of the bin folder located at `%USERPROFILE%\AutoHotkey Scripts\SwapAudio\bin`.
 
 &nbsp;
 
