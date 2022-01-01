@@ -5,7 +5,9 @@
 
 
 # Global variables
-$dataFile = "$env:USERPROFILE\AutoHotkey Scripts\SwapAudio\AudioDevices.dat"
+$exeFile = "$env:USERPROFILE\SwapAudio\SwapAudioDevices.exe"
+$dataFile = "$env:USERPROFILE\SwapAudio\AudioDevices.dat"
+$ahkFile = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\SwapAudioDevices.ahk"
 
 
 
@@ -13,6 +15,8 @@ $dataFile = "$env:USERPROFILE\AutoHotkey Scripts\SwapAudio\AudioDevices.dat"
 function Main() {
 	Write-Host ""
 	Write-Host ""
+
+	Check-Deps 0
 	
 	if (-Not(Test-Path -Path "$dataFile" -PathType Leaf)) {
 		First-Run 0
@@ -31,6 +35,72 @@ function Main() {
 			Write-Host -ForegroundColor Red "Incorrect confirmation input, please try again."
 			Main
 		}
+	}
+
+	Check-Move-AHK
+	Move-Exe
+
+	Write-Host ""
+	Write-Host -ForegroundColor Green "Complete!"
+	Write-Host "Press any key to exit..."
+	$Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+	Exit 0
+}
+
+function Check-Deps($entry) {
+	if ($entry -eq 2) {
+		Write-Host ""
+		Write-Host "Something went wrong. Please try installing `"AudioDeviceCmdlets`" manually."
+		Exit 1
+	}
+
+	$entry++
+
+	$checkAudioCmdlets = Get-Command -Name Get-AudioDevice -ErrorAction "SilentlyContinue"
+	if (!$checkAudioCmdlets) {
+		Write-Host "This program needs the Cmdlet `"AudioDeviceCmdlets`" to function properly."
+		Write-Host -ForegroundColor Yellow -NoNewline  "Do you want to try installing it automatically? ([Y]es/[N]o): "
+		$continue = Read-Host
+		if ($continue -eq "yes" -Or $continue -eq "ye" -Or $continue -eq "y") {
+			Install-Module -Name AudioDeviceCmdlets
+			Check-Deps $entry
+		}
+		elseif ($continue -eq "no" -Or $continue -eq "n") {
+			Write-Host ""
+			Write-Host "Please check the README for instructions on installing AudioDeviceCmdlets."
+			Write-Host "Press any key to exit..."
+			$Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+			Exit 0
+		}
+		else {
+			Write-Host -ForegroundColor Red "Incorrect confirmation input, please try again."
+			Write-Host ""
+			Check-Deps 0
+		}
+	}
+}
+
+function Check-Move-AHK() {
+	Write-Host ""
+	Write-Host -ForegroundColor Yellow "If you have AutoHotkey installed, you can control the device swap with the `"Pause/Break`" key."
+	Write-Host -ForegroundColor Yellow -NoNewline  "Do you want to move the AutoHotkey script to automatically load on Windows startup? ([Y]es/[N]o): "
+	$continue = Read-Host
+	if ($continue -eq "yes" -Or $continue -eq "ye" -Or $continue -eq "y") {
+		Copy-Item -Path "$PSScriptRoot\..\bin\SwapAudioDevices.ahk" -Destination "$ahkFile"
+
+		$checkAHKCommand = Get-Command -Name AutoHotkey -ErrorAction "SilentlyContinue"
+		if ($checkAHKCommand) {
+			AutoHotkey.exe "$ahkFile"
+		}
+	}
+	elseif ($continue -eq "no" -Or $continue -eq "n") {
+		Write-Host ""
+		Write-Host "You can move the AutoHotkey script later manually by checking the README for instructions."
+	}
+	else {
+		Write-Host -ForegroundColor Red "Incorrect confirmation input, please try again."
+		Write-Host ""
+		Check-Move-AHK
 	}
 }
 
@@ -83,7 +153,7 @@ function First-Run($entry) {
 	$secondRecordingDeviceID = Index-To-ID $secondRecordingDeviceIndex
 	$secondPlaybackDeviceID = Index-To-ID $secondPlaybackDeviceIndex
 
-	New-Item -Path "$dataFile" -ItemType File -Force
+	New-Item -Path "$dataFile" -ItemType File -Force | Out-Null
 	
 	"$firstRecordingDeviceID $firstPlaybackDeviceID" | Out-File -FilePath "$dataFile"
 	"$secondRecordingDeviceID $secondPlaybackDeviceID" | Out-File -FilePath "$dataFile" -Append
@@ -127,6 +197,10 @@ function Index-To-ID($deviceIndex) {
 	}
 	
 	return Get-AudioDevice -Index $deviceIndex | Select-Object -ExpandProperty ID
+}
+
+function Move-Exe() {
+	Copy-Item -Path "$PSScriptRoot\..\bin\SwapAudioDevices.exe" -Destination "$exeFile"
 }
 
 function Print-Pair-Choice($count, $recordingIndex, $playbackIndex) {

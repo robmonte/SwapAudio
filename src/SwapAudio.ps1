@@ -5,7 +5,7 @@
 
 
 # Global variables
-$dataFile = "$env:USERPROFILE\AutoHotkey Scripts\SwapAudio\AudioDevices.dat"
+$dataFile = "$env:USERPROFILE\SwapAudio\AudioDevices.dat"
 
 
 
