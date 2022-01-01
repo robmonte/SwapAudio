@@ -23,7 +23,6 @@ function Set-Devices($recordingID, $playbackID) {
 		Set-AudioDevice -ID "$recordingID" | Out-Null
 	}
 	if ($playbackID -ne 0) {
-		echo "setting playback"
 		Set-AudioDevice -ID "$playbackID" | Out-Null
 	}
 }

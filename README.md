@@ -26,4 +26,4 @@ For it script to work out-of-the-box, the executable file needs to be in the sam
 
 This tool is built using the [PS2EXE tool](https://github.com/MScholtes/PS2EXE) to generate a Windows executable file. To build a new executable from scratch, install PS2EXE and then run the following command from the base project directory:
 
-`ps2exe src/SwapAudio.ps1 bin/SwapAudioDevices.exe`
+`ps2exe src/SwapAudioDevices.ps1 bin/SwapAudioDevices.exe`
