@@ -82,13 +82,21 @@ function Check-Deps($entry) {
 
 function Check-Move-AHK() {
 	Write-Host ""
-	Write-Host -ForegroundColor Yellow "If you have AutoHotkey installed, you can control the device swap with the `"Pause/Break`" key."
-	Write-Host -ForegroundColor Yellow -NoNewline  "Do you want to move the AutoHotkey script to automatically load on Windows startup? ([Y]es/[N]o): "
+	Write-Host "You can control the audio device swap with the `"Pause/Break`" key through an AutoHotkey script."
+	Write-Host "This script can be set to auto-load on Windows startup so the swap key can always be pressed."
+	$checkAHKCommand = Get-Command -Name AutoHotkey -ErrorAction "SilentlyContinue"
+	if (!$checkAHKCommand) {
+		Write-Host ""
+		Write-Host -ForegroundColor Yellow "You don't have AutoHotkey installed. You can still choose to set the script to auto-run."
+		Write-Host -ForegroundColor Yellow "Visit https://www.autohotkey.com/ to download and install it, or use an alternate method for setting a toggle key."
+	}
+
+	Write-Host -ForegroundColor Yellow -NoNewline  "Do you want to set the AutoHotkey script to automatically load on Windows startup? ([Y]es/[N]o): "
 	$continue = Read-Host
 	if ($continue -eq "yes" -Or $continue -eq "ye" -Or $continue -eq "y") {
-		Copy-Item -Path "$PSScriptRoot\..\bin\SwapAudioDevices.ahk" -Destination "$ahkFile"
-
-		$checkAHKCommand = Get-Command -Name AutoHotkey -ErrorAction "SilentlyContinue"
+		Copy-Item -Path "$PSScriptRoot\..\bin\SwapAudioDevices.ahk" -Destination "$ahkFile"		
+		Write-Host ""
+		Write-Host -ForegroundColor Green "The script has been moved to the startup folder and the script is now running! Try it out! (Pause/Break key)"
 		if ($checkAHKCommand) {
 			AutoHotkey.exe "$ahkFile"
 		}
@@ -164,6 +172,12 @@ function Get-Pair-Choice($count) {
 	Write-Host -NoNewline "Enter the "
 	Write-Host -NoNewline -ForegroundColor Yellow "recording "
 	$RecordingDeviceIndex = Read-Host -Prompt "device index number for the $count pair of devices: "
+	if ($RecordingDeviceIndex -isnot [int]) {
+		Write-Host ""
+		Write-Host -ForegroundColor Red "Incorrect input. Please only enter a single index number for each step."
+		Write-Host ""
+		Get-Pair-Choice $count
+	}
 	if ($RecordingDeviceIndex -ne 0) {
 		$CheckRecording = Get-AudioDevice -Index $RecordingDeviceIndex | Select-Object -ExpandProperty Type
 		if ($CheckRecording -ne "Recording") {
@@ -176,7 +190,13 @@ function Get-Pair-Choice($count) {
 	
 	Write-Host -NoNewline "Enter the "
 	Write-Host -NoNewline -ForegroundColor Yellow "playback "
-	$PlaybackDeviceIndex = Read-Host -Prompt "device index number for the $count pair of devices:  "
+	$PlaybackDeviceIndex = Read-Host -Prompt "device index number for the $count pair of devices: "
+	if ($PlaybackDeviceIndex -isnot [int]) {
+		Write-Host ""
+		Write-Host -ForegroundColor Red "Incorrect input. Please only enter a single index number for each step."
+		Write-Host ""
+		Get-Pair-Choice $count
+	}
 	if ($PlaybackDeviceIndex -ne 0) {
 		$CheckPlayback = Get-AudioDevice -Index $PlaybackDeviceIndex | Select-Object -ExpandProperty Type
 		if ($CheckPlayback -ne "Playback") {
