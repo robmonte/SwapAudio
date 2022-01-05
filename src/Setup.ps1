@@ -64,6 +64,7 @@ function Check-Deps($entry) {
 		if ($continue -eq "yes" -Or $continue -eq "ye" -Or $continue -eq "y") {
 			Install-Module -Name AudioDeviceCmdlets
 			Check-Deps $entry
+			return
 		}
 		elseif ($continue -eq "no" -Or $continue -eq "n") {
 			Write-Host ""
@@ -109,6 +110,7 @@ function Check-Move-AHK() {
 		Write-Host -ForegroundColor Red "Incorrect confirmation input, please try again."
 		Write-Host ""
 		Check-Move-AHK
+		return
 	}
 }
 
@@ -125,6 +127,7 @@ function Confirm() {
 		Write-Host -ForegroundColor Red "Incorrect confirmation input, please try again."
 		Write-Host ""
 		Confirm
+		return
 	}
 }
 
@@ -172,11 +175,12 @@ function Get-Pair-Choice($count) {
 	Write-Host -NoNewline "Enter the "
 	Write-Host -NoNewline -ForegroundColor Yellow "recording "
 	$RecordingDeviceIndex = Read-Host -Prompt "device index number for the $count pair of devices: "
-	if ($RecordingDeviceIndex -isnot [int]) {
+	if ($RecordingDeviceIndex -eq "" -or $RecordingDeviceIndex -as [int] -isnot [int]) {
 		Write-Host ""
 		Write-Host -ForegroundColor Red "Incorrect input. Please only enter a single index number for each step."
 		Write-Host ""
 		Get-Pair-Choice $count
+		return
 	}
 	if ($RecordingDeviceIndex -ne 0) {
 		$CheckRecording = Get-AudioDevice -Index $RecordingDeviceIndex | Select-Object -ExpandProperty Type
@@ -191,11 +195,12 @@ function Get-Pair-Choice($count) {
 	Write-Host -NoNewline "Enter the "
 	Write-Host -NoNewline -ForegroundColor Yellow "playback "
 	$PlaybackDeviceIndex = Read-Host -Prompt "device index number for the $count pair of devices: "
-	if ($PlaybackDeviceIndex -isnot [int]) {
+	if ($PlaybackDeviceIndex -eq "" -or $PlaybackDeviceIndex -as [int] -isnot [int]) {
 		Write-Host ""
 		Write-Host -ForegroundColor Red "Incorrect input. Please only enter a single index number for each step."
 		Write-Host ""
 		Get-Pair-Choice $count
+		return
 	}
 	if ($PlaybackDeviceIndex -ne 0) {
 		$CheckPlayback = Get-AudioDevice -Index $PlaybackDeviceIndex | Select-Object -ExpandProperty Type
