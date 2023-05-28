@@ -1,0 +1,2 @@
+# Exclude unneeded files from the releases
+.git* export-ignore

@@ -7,7 +7,9 @@
 # Global variables
 $exeFile = "$env:USERPROFILE\SwapAudio\SwapAudioDevices.exe"
 $dataFile = "$env:USERPROFILE\SwapAudio\AudioDevices.dat"
-$ahkFile = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\SwapAudioDevices.ahk"
+$startMenuLoc = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs"
+$ahkFile = "$startMenuLoc\Startup\SwapAudioDevices.ahk"
+
 
 
 
@@ -38,9 +40,11 @@ function Main() {
 	}
 
 	Check-Move-AHK
-	Move-Exe
-
+	Copy-Item -Path "$PSScriptRoot\..\bin\SwapAudioDevices.exe" -Destination "$exeFile"
 	Write-Host ""
+
+	Create-Start-Menu-Shortcut
+
 	Write-Host -ForegroundColor Green "Complete!"
 	Write-Host "Press any key to exit..."
 	$Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -129,6 +133,20 @@ function Confirm() {
 		Confirm
 		return
 	}
+}
+
+function Create-Start-Menu-Shortcut() {
+	
+	Write-Host "If for any reason you need to re-run this setup, simply search for `"SwapAudio Setup`" in"
+	Write-Host "the Start Menu, or copy that Start Menu shortcut to your Desktop/another location if desired."
+	Write-Host ""
+
+	$WshShell = New-Object -comObject WScript.Shell
+	$Shortcut = $WshShell.CreateShortcut("$startMenuLoc\SwapAudio Setup.lnk")
+	$Shortcut.TargetPath = "$PSScriptRoot\..\src\Run.cmd"
+	$Shortcut.Save()
+	
+	return
 }
 
 function First-Run($entry) {
@@ -222,10 +240,6 @@ function Index-To-ID($deviceIndex) {
 	}
 	
 	return Get-AudioDevice -Index $deviceIndex | Select-Object -ExpandProperty ID
-}
-
-function Move-Exe() {
-	Copy-Item -Path "$PSScriptRoot\..\bin\SwapAudioDevices.exe" -Destination "$exeFile"
 }
 
 function Print-Pair-Choice($count, $recordingIndex, $playbackIndex) {
